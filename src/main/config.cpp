@@ -10,6 +10,7 @@
 #endif
 
 #include <cstdio>
+#include <cstdlib>
 #include <cinttypes>
 
 namespace duckdb {
@@ -301,7 +302,13 @@ idx_t DBConfig::GetSystemMaxThreads(FileSystem &fs) {
 
 void DBConfig::SetDefaultMaxThreads() {
 #ifndef DUCKDB_NO_THREADS
-	options.maximum_threads = GetSystemMaxThreads(*file_system);
+char const* duckdb_threads = getenv("DUCKDB_NUM_THREADS");
+if ( duckdb_threads != NULL ) {
+    std::string s( duckdb_threads );
+    options.maximum_threads = std::stoi(s);
+  } else {
+    options.maximum_threads = GetSystemMaxThreads(*file_system);
+  }
 #else
 	options.maximum_threads = 1;
 #endif
